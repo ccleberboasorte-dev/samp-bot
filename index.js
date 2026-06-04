@@ -73,12 +73,15 @@ client.on('interactionCreate', async interaction => {
 client.login(process.env.DISCORD_TOKEN);
 
 const http = require('http');
-http.createServer((req, res) => {
+const server = http.createServer((req, res) => {
   res.writeHead(200, { 'Content-Type': 'text/plain' });
   res.end('Bot online!');
-}).listen(process.env.PORT || 10000, () => {
-  console.log(`HTTP server listening on port ${process.env.PORT || 10000}`);
 });
+const PORT = process.env.PORT || 10000;
+server.listen(PORT, '0.0.0.0', () => {
+  console.log(`HTTP server listening on 0.0.0.0:${PORT}`);
+});
+server.on('error', err => console.error('HTTP server error:', err.message));
 
 const msgCache = {};
 
