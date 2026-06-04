@@ -1,7 +1,7 @@
 require('dotenv').config();
 const fs = require('fs');
 const path = require('path');
-const { Client, Collection, GatewayIntentBits, EmbedBuilder, PermissionFlagsBits } = require('discord.js');
+const { Client, Collection, GatewayIntentBits, EmbedBuilder } = require('discord.js');
 const SampQuery = require('samp-query');
 
 function queryServer(ip, port) {
@@ -81,14 +81,26 @@ async function updateMessage(channelId, cacheKey, buildEmbed) {
   try {
     const embed = await buildEmbed(true);
     if (msgCache[cacheKey]) {
-      try { const msg = await channel.messages.fetch(msgCache[cacheKey]); await msg.edit({ embeds: [embed] }); return; } catch { delete msgCache[cacheKey]; }
+      try {
+        const msg = await channel.messages.fetch(msgCache[cacheKey]);
+        await msg.edit({ embeds: [embed] });
+        return;
+      } catch {
+        delete msgCache[cacheKey];
+      }
     }
     const msg = await channel.send({ embeds: [embed] });
     msgCache[cacheKey] = msg.id;
   } catch {
     const embed = await buildEmbed(false);
     if (msgCache[cacheKey]) {
-      try { const msg = await channel.messages.fetch(msgCache[cacheKey]); await msg.edit({ embeds: [embed] }); return; } catch { delete msgCache[cacheKey]; }
+      try {
+        const msg = await channel.messages.fetch(msgCache[cacheKey]);
+        await msg.edit({ embeds: [embed] });
+        return;
+      } catch {
+        delete msgCache[cacheKey];
+      }
     }
     const msg = await channel.send({ embeds: [embed] });
     msgCache[cacheKey] = msg.id;
@@ -107,15 +119,41 @@ async function updatePresence() {
 async function updateStatus() {
   await updateMessage(process.env.TEXT_CHANNEL_ID, 'statusMessageId', async (online) => {
     if (!online) {
-      return new EmbedBuilder().setTitle('São Caetano Roleplay').setColor(0xED4245).addFields({ name: 'Servidor', value: 'Offline', inline: false }, { name: 'IP', value: `${process.env.SAMP_IP}:${process.env.SAMP_PORT}`, inline: true }).setFooter({ text: 'Servidor offline' }).setTimestamp();
+      return new EmbedBuilder()
+        .setTitle('São Caetano Roleplay')
+        .setColor(0xED4245)
+        .addFields(
+          { name: 'Servidor', value: '🔴 Offline', inline: false },
+          { name: 'IP', value: `${process.env.SAMP_IP}:${process.env.SAMP_PORT}`, inline: true }
+        )
+        .setFooter({ text: 'Servidor offline' })
+        .setTimestamp();
     }
     const info = await getServerInfo();
-    return new EmbedBuilder().setTitle('São Caetano Roleplay').setColor(0x5865F2).addFields({ name: 'Servidor', value: info.hostname || 'São Caetano Roleplay', inline: false }, { name: 'Jogadores', value: `${info.players}/${info.maxplayers}`, inline: true }, { name: 'Modo', value: info.mapname || 'N/A', inline: true }, { name: 'Status', value: 'Online', inline: true }).setFooter({ text: `IP: ${process.env.SAMP_IP}:${process.env.SAMP_PORT}` }).setTimestamp();
+    return new EmbedBuilder()
+      .setTitle('São Caetano Roleplay')
+      .setColor(0x5865F2)
+      .addFields(
+        { name: 'Servidor', value: info.hostname || 'São Caetano Roleplay', inline: false },
+        { name: '👥 Jogadores', value: `${info.players}/${info.maxplayers}`, inline: true },
+        { name: '🎮 Modo', value: info.mapname || 'N/A', inline: true },
+        { name: '🟢 Status', value: 'Online', inline: true }
+      )
+      .setFooter({ text: `IP: ${process.env.SAMP_IP}:${process.env.SAMP_PORT}` })
+      .setTimestamp();
   });
 }
 
 async function updateIpEmbed() {
   await updateMessage(process.env.IP_CHANNEL_ID, 'ipMessageId', async () => {
-    return new EmbedBuilder().setTitle('São Caetano Roleplay').setColor(0x5865F2).addFields({ name: 'Conecte-se agora', value: process.env.SAMP_IP + ':' + process.env.SAMP_PORT, inline: false }).setFooter({ text: 'Copie o IP e conecte' }).setTimestamp();
+    return new EmbedBuilder()
+      .setTitle('São Caetano Roleplay')
+      .setColor(0x5865F2)
+      .setDescription('🎯 **Conecte-se agora!**')
+      .addFields(
+        { name: '📌 IP do Servidor', value: `\`\`\`${process.env.SAMP_IP}:${process.env.SAMP_PORT}\`\`\``, inline: false }
+      )
+      .setFooter({ text: 'Copie o IP e entre no jogo' })
+      .setTimestamp();
   });
 }
