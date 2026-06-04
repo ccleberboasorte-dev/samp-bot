@@ -72,6 +72,14 @@ client.on('interactionCreate', async interaction => {
 
 client.login(process.env.DISCORD_TOKEN);
 
+const http = require('http');
+http.createServer((req, res) => {
+  res.writeHead(200, { 'Content-Type': 'text/plain' });
+  res.end('Bot online!');
+}).listen(process.env.PORT || 10000, () => {
+  console.log(`HTTP server listening on port ${process.env.PORT || 10000}`);
+});
+
 const msgCache = {};
 
 async function updateMessage(channelId, cacheKey, buildEmbed) {
